@@ -221,6 +221,8 @@ df_nibe_casts <- df_nibe_casts %>%
   select(timestamp = timestamp.x,
          type,
          sourceID,
+         targetID,
+         targetInstance,
          abilityGameID,
          logID,
          fight,
@@ -242,7 +244,9 @@ df_nibe_casts %>%
 
 
 ```{r}
-df_nibe_casts %>% filter(type=="summon") %>% write.csv(paste0("./clean_data_Nibelung_PTR_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
+df_nibe_casts %>% 
+  filter(type=="summon") %>% 
+  write.csv(paste0("./clean_data_Nibelung_PTR_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
 
 ```
 
