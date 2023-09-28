@@ -1,0 +1,248 @@
+---
+title: "Nibelung"
+output: html_document
+date: "2023-09-28"
+---
+
+```{r}
+source(file = "./_scripts/0_0_Libraries.R")
+source(file = "./_scripts/0_1_downloadsett.R")
+```
+
+
+
+
+```{r}
+scale_factor = 2.65
+
+# ` variable name `     |n      or | or \ Symbol on Keyboard
+#"forge-"    
+#e901 github
+#e900 discord
+font_add(family = "forgefooter", "forgefooter.ttf")
+font_import()
+n
+showtext_auto(TRUE)
+
+```
+
+
+```{r}
+Valkyrs_cast <- "ability.id in (71842,71841,71843,71844)"
+TWinEssence <-"ability.id in (65684,65686) or type = 'combatantinfo'"
+
+df1 <- read.csv("../ICC_PTR/raw_data/ICC_PTR_clean_Data_2ndround_2023_09_21_h20_m04.csv")
+df2 <- read.csv("../ICC_PTR/raw_data/ICC_PTR_clean_Data_1stround_2023_09_21_h16_m11.csv")
+
+
+df <- bind_rows(df1,df2)
+
+df_query <- df  %>%
+  filter(encounterName!="Gunship") %>%
+  filter(duration_s>=60) %>%
+  group_by(logID) %>%
+  summarise(n=n()) 
+
+
+n_loop = nrow(df_query)
+
+request_logs_code <- sprintf(request_logs_str,
+                             df_query$logID,
+                             Valkyrs_cast)
+
+
+output <- lapply(seq_along(request_logs_code), function(i) {
+  
+  response <- WCL_API2_request(request_logs_code[i]
+  )$data$reportData$report$events$data
+  
+  if (!is.null(response) & length(response)>0) {
+    response <- response %>%
+      mutate(logID = as.character(df_query$logID[i]))
+  } else {
+    response <- data.frame(timestamp=-1,
+                           logID = as.character(df_query$logID[i]))
+  }
+  
+  if (i %% 25 == 0) {
+    cat("Processed log",i, "out of", n_loop," PTR logs\n")
+  }
+  
+  return(response)
+})
+
+output2 <- do.call(bind_rows, output)
+
+write.csv(output2,paste0("./output_nibelung_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+```
+
+
+
+
+```{r}
+df <- read.csv("output_nibelung_2023_09_28_h14_m14.csv")
+
+df_query <- df %>%
+  filter(timestamp != -1) %>% 
+  select(logID) %>%
+  group_by(logID) %>%
+  summarise(n=n())
+
+
+n_loop = nrow(df_query)
+
+request_logs_code <- sprintf(request_player_str,
+                             df_query$logID)
+
+
+output <- lapply(seq_along(request_logs_code), function(i) {
+  
+  response <- WCL_API2_request(request_logs_code[i]
+  )$data$reportData$report$masterData$actors
+  
+  if (!is.null(response) & length(response)>0) {
+    response <- response %>%
+      mutate(logID = as.character(df_query$logID[i]))
+  } else {
+    response <- data.frame(timestamp=-1,
+                           logID = as.character(df_query$logID[i]))
+  }
+  
+  if (i %% 25 == 0) {
+    cat("Processed log",i, "out of", n_loop," PTR logs\n")
+  }
+  
+  return(response)
+})
+
+output2 <- do.call(bind_rows, output)
+
+write.csv(output2,paste0("./output_nibelung_class_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+
+```
+
+
+```{r}
+df_query <- df %>%
+  filter(timestamp != -1 & type=="summon") %>% 
+  select(logID,fightID=fight,sourceID) %>%
+  group_by(logID,fightID,sourceID) %>%
+  summarise(n=n()) 
+
+
+n_loop = nrow(df_query)
+
+request_logs_code <- sprintf(request_casts_str,
+                             df_query$logID,
+                             df_query$fightID,
+                             df_query$sourceID)
+
+
+
+
+
+output <- lapply(seq_along(request_logs_code), function(i) {
+  
+  response <- WCL_API2_request(request_logs_code[i]
+  )$data$reportData$report$events$data
+  
+  if (!is.null(response) & length(response)>0) {
+    response <- response %>%
+      mutate(logID = as.character(df_query$logID[i]))
+  } else {
+    response <- data.frame(timestamp=-1,
+                           logID = as.character(df_query$logID[i]),
+                           fight = as.integer(df_query$fightID[i]),
+                           sourceID = as.integer(df_query$sourceID[i]))
+  }
+  
+  if (i %% 25 == 0) {
+    cat("Processed log",i, "out of", n_loop," PTR logs\n")
+  }
+  
+  return(response)
+})
+
+output <- lapply(output, function(df) {
+  df <- df %>%
+    mutate(sourceID = as.character(sourceID),
+           fight = as.character(fight))
+  return(df)
+})
+
+output2 <- do.call(bind_rows, output)
+
+
+output3 <- output2  %>%
+  unnest_wider(classResources, names_sep = "_") 
+
+output3 <- do.call(bind_cols, output2)
+
+write.csv(output3,paste0("./output_nibelung_cast_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+```
+
+
+
+
+
+```{r}
+nibe_df <- read.csv("output_nibelung_2023_09_28_h14_m14.csv")
+class_nibe_df <- read.csv("output_nibelung_class_2023_09_28_h15_m10.csv")
+casts_nibe_df <- read.csv("output_nibelung_cast_2023_09_28_h16_m09.csv")
+
+df_nibe_casts <- bind_rows(
+  
+  casts_nibe_df %>% 
+    filter(timestamp!=-1 & type == "cast" ) %>%
+    mutate(sourceID=as.integer(sourceID),
+           fight=as.integer(fight)),
+  
+  nibe_df %>%
+    filter(timestamp != -1 & type=="summon") %>% 
+    select(-c(X))
+  
+) %>%
+  group_by(logID,fight,sourceID) %>% 
+  arrange(timestamp,.by_group = T) %>% 
+  filter(lead(abilityGameID) %in% c(71843,71844) | lag(abilityGameID) %in% c(71843,71844) | abilityGameID %in% c(71843,71844)) %>%
+  left_join(class_nibe_df,by=c("logID","sourceID" = "id"))
+
+df_nibe_casts <- df_nibe_casts %>%
+  mutate(link = paste0("https://classic.warcraftlogs.com/reports/",
+                       logID,
+                       "#type=summary&view=events&fight=",
+                       fight,
+                       "&start=",
+                       timestamp.x-2000,
+                       "&end=",
+                       timestamp.x+2000,
+                       "&source=",
+                       sourceID)) %>%
+  select(timestamp = timestamp.x,
+         type,
+         sourceID,
+         abilityGameID,
+         logID,
+         fight,
+         subType,name,
+         link)
+
+df_nibe_casts_mage <- df_nibe_casts %>% 
+  filter(subType=="Mage") 
+
+
+
+df_nibe_casts %>% 
+  group_by(logID,subType) %>%
+  summarise(n=n()) %>%
+  arrange(subType)%>% 
+  group_by(subType)%>%
+  summarise(n=n())
+```
+
+
+```{r}
+df_nibe_casts %>% filter(type=="summon") %>% write.csv(paste0("./clean_data_Nibelung_PTR_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
+
+```
+
