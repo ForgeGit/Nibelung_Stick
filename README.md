@@ -2,7 +2,8 @@
 
  _Discord_: `Discfordge` <sup>[_Vivax (Pagle-US)_]</sup> <br />
 
-Public data for Nibelung from round 1 and round 2 of Icecrown Citadel (ICC) PTR - World of Warcraft: Classic Wrath of the Lich King (WOTLKC)
+Public data for Nibelung from round 1 and round 2 of Icecrown Citadel (ICC) PTR <br />
+World of Warcraft: Classic Wrath of the Lich King (WOTLKC)
 
 | Class    | Total Logs |
 | :------- | ----------:|
@@ -12,6 +13,12 @@ Public data for Nibelung from round 1 and round 2 of Icecrown Citadel (ICC) PTR 
 | Mage     |        108 |
 | Shaman   |         26 |
 
+Nibelung has two (2) different versions:
+
+- [Normal mode Lady Deathwhisper ilvl 264 (item:49992)](https://www.wowhead.com/wotlk/item=49992/nibelung)
+
+- [Heroic mode Lady Deathwhisper ilvl 277 (item:50648)](https://www.wowhead.com/wotlk/item=50648/nibelung)
+
 ## Methodology
 
 All the data was collected using the [Warcraft Logs Classic API v2](https://articles.classic.warcraftlogs.com/help/api-documentation) and processed with R v.4.2 (R Development Core Team).
@@ -20,7 +27,7 @@ Log IDs for PTR data was previously obtained and filtered in a different project
 - https://github.com/ForgeGit/ICC_PTR
 
 Full data can be found in this same repository:<br />
-- 
+- https://github.com/ForgeGit/Nibelung_Stick/blob/main/clean_data_Nibelung_PTR_2023_09_28_h18_m22.csv
 
 
 ## Other analysis and random stuff
