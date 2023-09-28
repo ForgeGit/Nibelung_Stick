@@ -26,7 +26,7 @@ Nibelung has two (2) different versions:
 You can check for Val'kyr summons on your own logs with the filter expression `ability.id in (71843,71844)` 
 
 <img src="_img/filterexpression.png"/> <br />
-__You have to enter that and press "Enter", btw__
+_You have to enter that and press "Enter", btw_
 
 
 ## Methodology
