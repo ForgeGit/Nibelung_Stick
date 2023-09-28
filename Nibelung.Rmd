@@ -217,7 +217,8 @@ df_nibe_casts <- df_nibe_casts %>%
                        "&end=",
                        timestamp.x+2000,
                        "&source=",
-                       sourceID)) %>%
+                       sourceID,
+                       "&translate=true")) %>%
   select(timestamp = timestamp.x,
          type,
          sourceID,

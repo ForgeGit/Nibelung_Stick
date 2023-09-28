@@ -37,7 +37,7 @@ Log IDs for PTR data was previously obtained and filtered in a different project
 - https://github.com/ForgeGit/ICC_PTR
 
 Full data can be found in this same repository:<br />
-- https://github.com/ForgeGit/Nibelung_Stick/blob/main/clean_data_Nibelung_PTR_2023_09_28_h18_m53.csv
+- https://github.com/ForgeGit/Nibelung_Stick/blob/main/clean_data_Nibelung_PTR_2023_09_28_h19_m07.csv
 
 
 ## Other analysis and random stuff
