@@ -204,7 +204,14 @@ df_nibe_casts <- bind_rows(
 ) %>%
   group_by(logID,fight,sourceID) %>% 
   arrange(timestamp,.by_group = T) %>% 
-  filter(lead(abilityGameID) %in% c(71843,71844) | lag(abilityGameID) %in% c(71843,71844) | abilityGameID %in% c(71843,71844)) %>%
+  filter(lead(abilityGameID) %in% c(71843,71844) | 
+           lag(abilityGameID) %in% c(71843,71844) | 
+           
+           abilityGameID %in% c(71843,71844) | 
+           
+           lead(abilityGameID,n=2) %in% c(71843,71844) | 
+           lag(abilityGameID,n=2) %in% c(71843,71844)) %>%
+  
   left_join(class_nibe_df,by=c("logID","sourceID" = "id"))
 
 df_nibe_casts <- df_nibe_casts %>%
@@ -228,8 +235,13 @@ df_nibe_casts <- df_nibe_casts %>%
          logID,
          fight,
          subType,name,
-         link)
-
+         link) %>%
+  
+  mutate(tag = ifelse(type == "cast" & lag(abilityGameID) %in% c(71843,71844), "after",
+                      ifelse(type=="cast" & lead(abilityGameID) %in% c(71843,71844),"before",
+                             ifelse(type=="cast" & lead(abilityGameID,n=2) %in% c(71843,71844),"before (2)",
+                                    ifelse(type=="cast" & lag(abilityGameID,n=2) %in% c(71843,71844),"after (2)",type)))))
+                      
 df_nibe_casts_mage <- df_nibe_casts %>% 
   filter(subType=="Mage") 
 
@@ -249,5 +261,21 @@ df_nibe_casts %>%
   filter(type=="summon") %>% 
   write.csv(paste0("./clean_data_Nibelung_PTR_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
 
+```
+
+
+
+
+```{r}
+df_nibe_casts %>% 
+  
+  filter(subType=="Druid" & type =="cast") %>%
+  select(abilityGameID,tag) %>%
+  group_by(abilityGameID,tag) %>%
+  summarise(n=n()) %>%
+  arrange(desc(n))
+  
+  pivot_wider(n)
+  
 ```
 
